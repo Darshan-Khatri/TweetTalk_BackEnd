@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <Folder Include="Core\IRepositories\" />
-    <Folder Include="DTOs\" />
     <Folder Include="HelperDTO\" />
     <Folder Include="Persistance\Repositories\" />
   </ItemGroup>
