@@ -1,3 +1,4 @@
+using DatingApplicationBackEnd.Extensions;
 using DatingApplicationBackEnd.Interfaces;
 using DatingApplicationBackEnd.Persistance;
 using DatingApplicationBackEnd.Services;
@@ -32,33 +33,12 @@ namespace DatingApplicationBackEnd
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<ITokenService, TokenService>();
-            services.AddDbContext<DataContext>(options =>
-            {
-                options.UseSqlServer(Configuration.GetConnectionString("DataBaseConnection"));
-            });
             services.AddControllers();
             services.AddCors();
 
-            /*1-When user login into application server generates the token for that user and that token is stored in client browser.
-             * 2- In our UserController we have one method which gets user when we pass id of that user. We have made that method "authorize".
-             * 3- So when user tries to use that actionMethod, our server will validate userToken which is stored in user's browser local storage. These authentication process is done here.
-             * 4- Here we are defining "JwtBearerDefaults" as a default scheme for authenticate/authorize user.
-             * 5- Now we are defining paramters used to authenticate user ("TokenValidationParameters").
-             * 6- For simplicity currenlty we are using IssuerSigningKey as the only authentication paramter.
-             * 7- You must add "app.UseAuthentication()" middleware before "app.UseAuthorization()".
-             */
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(Options =>
-                {
-                    Options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"])),
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                    };
-                });
+            //This are our custome Extension Methods
+            services.AddApplicationServices(Configuration);
+            services.AddIdentityService(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
