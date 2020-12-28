@@ -20,7 +20,7 @@ namespace DatingApplicationBackEnd.Services
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
         }
 
-        /*This method creates the JWT token as soon as user logsin.
+        /*This method creates the JWT token as soon as user log-in.(Install nugetPackage "System.IdentityModel.Tokens.jwt")
         1- When user enters username, if username is valid then will get complete user object.
         2- Now we call create token method from TokenService class and pass that user as createToken method parameter.
         3- One we are inside the createtoken method, We define the clamis, in our case we are including only username as the claim.
