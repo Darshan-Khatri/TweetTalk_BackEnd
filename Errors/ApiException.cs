@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace DatingApplicationBackEnd.Errors
 {
+    //The only purpose of this class is what we would if some exception in our application.
     public class ApiException
     {
         public ApiException(int statusCode, string message = null, string details = null)

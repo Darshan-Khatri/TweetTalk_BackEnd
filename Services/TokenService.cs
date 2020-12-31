@@ -14,6 +14,7 @@ namespace DatingApplicationBackEnd.Services
 {
     public class TokenService : ITokenService
     {
+        //The secretKey that we have defined in appsetting.json is used for both data encryption and decryption.
         private readonly SymmetricSecurityKey _key;
         public TokenService(IConfiguration config)
         {

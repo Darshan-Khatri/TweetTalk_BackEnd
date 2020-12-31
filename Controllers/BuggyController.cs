@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace DatingApplicationBackEnd.Controllers
 {
+    //This controller is use for client-side(Angular) exceptional handling.
     public class BuggyController : BaseApiController
     {
         private readonly DataContext dataContext;

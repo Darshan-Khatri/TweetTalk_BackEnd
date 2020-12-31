@@ -1,5 +1,8 @@
-﻿using DatingApplicationBackEnd.Interfaces;
+﻿using AutoMapper;
+using DatingApplicationBackEnd.HelperDTO;
+using DatingApplicationBackEnd.Interfaces;
 using DatingApplicationBackEnd.Persistance;
+using DatingApplicationBackEnd.Persistance.Repositories;
 using DatingApplicationBackEnd.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +19,8 @@ namespace DatingApplicationBackEnd.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration Configuration)
         {
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DataBaseConnection"));

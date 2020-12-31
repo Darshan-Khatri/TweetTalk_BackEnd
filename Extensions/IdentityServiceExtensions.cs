@@ -20,7 +20,7 @@ namespace DatingApplicationBackEnd.Extensions
              * 4- Here we are defining "JwtBearerDefaults" as a default scheme for authenticate/authorize user.
              * 5- Now we are defining paramters used to authenticate user ("TokenValidationParameters").
              * 6- For simplicity currenlty we are using IssuerSigningKey as the only authentication paramter.
-             * 7- You must add "app.UseAuthentication()" middleware before "app.UseAuthorization()".
+             * 7- You must add "app.UseAuthentication()" middleware before "app.UseAuthorization()" in startup.cs file.
              */
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(Options =>

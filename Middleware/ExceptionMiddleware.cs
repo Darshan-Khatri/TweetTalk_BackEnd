@@ -13,8 +13,11 @@ namespace DatingApplicationBackEnd.Middleware
 {
     public class ExceptionMiddleware
     {
+        //RequestDelegate is use to pass http request to next middleware.
         private readonly RequestDelegate next;
+        //ILogger is use to show complete detailed error message in TERMINAL WINDOW.
         private readonly ILogger<ExceptionMiddleware> logger;
+        //IHostEnvironment is use to check in which environment the has occured.
         private readonly IHostEnvironment env;
 
         public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
@@ -24,14 +27,17 @@ namespace DatingApplicationBackEnd.Middleware
             this.env = env;
         }
 
+        //We are instantiate HttpContext to use all features of Http.
         public async Task InvokeAsync(HttpContext context)
         {
             try
             {
+                //We are passing http request to below or other middleware until some exception occurs, if exception occured in any of middleware then will move to catch block and see what kind of exception we get and what will do after we get an exception.
                 await next(context);
             }
             catch (Exception ex)
             {
+                //We are here because in our application some exception is occured. 
                 logger.LogError(ex, ex.Message);
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

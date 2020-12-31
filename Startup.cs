@@ -19,7 +19,7 @@ namespace DatingApplicationBackEnd
         {
             Configuration = configuration;
         }
-
+        //This configuration is defined in appsetting.json file
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -36,13 +36,15 @@ namespace DatingApplicationBackEnd
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            //This is our custom middleware for anytype of exception in any type of environment like Developement,production etc.
+            //During application run time if some exception is occured then i will be called.
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
 
             app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
 
-            //app.UseCors(options => options.AllowAnyOrigin());
+            //When server sees any "authorize" property in ActionMethod that request stops here it will internally look for any authentication scheme in IServiceCollection. Here we have that scheme in our IdentityService extension method.
             app.UseAuthentication();
 
             app.UseAuthorization();
