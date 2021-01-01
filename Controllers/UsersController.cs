@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace DatingApplicationBackEnd.Controllers
@@ -52,6 +53,21 @@ namespace DatingApplicationBackEnd.Controllers
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
             return await userRepository.GetMemberByUsernameAsync(username);
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
+        {
+            //This will gives us username from the token that api uses to authenticate user.
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await userRepository.GetUserByUsernameAsync(username);
+
+            //Need to map from memberUpdateDto to AppUser
+            mapper.Map(memberUpdateDto, user);
+
+            userRepository.Update(user);
+            if (await userRepository.SavaAllAsync()) return NoContent();
+            return BadRequest("Fails to update user!!");
         }
     }
 }
