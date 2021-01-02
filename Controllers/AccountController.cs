@@ -49,6 +49,7 @@ namespace DatingApplicationBackEnd.Controllers
             user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
             user.PasswordSalt = hmac.Key;
             
+
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
             return Ok(
