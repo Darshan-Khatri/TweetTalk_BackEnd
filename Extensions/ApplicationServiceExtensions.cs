@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DatingApplicationBackEnd.Helper;
 using DatingApplicationBackEnd.HelperDTO;
 using DatingApplicationBackEnd.Interfaces;
 using DatingApplicationBackEnd.Persistance;
@@ -18,7 +19,9 @@ namespace DatingApplicationBackEnd.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration Configuration)
         {
+            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IPhotoService, PhotoService>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddDbContext<DataContext>(options =>

@@ -24,7 +24,7 @@ namespace DatingApplicationBackEnd.Services
         /*This method creates the JWT token as soon as user log-in.(Install nugetPackage "System.IdentityModel.Tokens.jwt")
         1- When user enters username, if username is valid then will get complete user object.
         2- Now we call create token method from TokenService class and pass that user as createToken method parameter.
-        3- One we are inside the createtoken method, We define the clamis, in our case we are including only username as the claim.
+        3- One we are inside the createtoken method, We define the claims, in our case we are including only username as the claim.
         4- Now we specify the SecretKey which we have in our server and Algorithm which gonna a create token with our secretKey.
         5- Now in tokenDescriptor object we have included our claimsList as Subject, Token expire time and SigningCredentials.
         6- JwtSecurityTokenHandler this class is responsible for JWT token creation, so will create object of this class.

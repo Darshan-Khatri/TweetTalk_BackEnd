@@ -14,8 +14,8 @@ namespace DatingApplicationBackEnd.Extensions
     {
         public static IServiceCollection AddIdentityService(this IServiceCollection services, IConfiguration Configuration)
         {
-            /*1-When user login into application server generates the token for that user and that token is stored in client browser.
-             * 2- In our UserController we have one method which gets user when we pass id of that user. We have made that method "authorize".
+            /*1-When user login into application, server generates the token for that user and that token is stored in client browser.
+             * 2- In our UserController, we have made all method "authorize".
              * 3- So when user tries to use that actionMethod, our server will validate userToken which is stored in user's browser local storage. These authentication process is done here.
              * 4- Here we are defining "JwtBearerDefaults" as a default scheme for authenticate/authorize user.
              * 5- Now we are defining paramters used to authenticate user ("TokenValidationParameters").

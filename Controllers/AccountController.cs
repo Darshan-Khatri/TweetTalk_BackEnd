@@ -64,7 +64,9 @@ namespace DatingApplicationBackEnd.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
-            var user = await context.Users.SingleOrDefaultAsync(n => n.UserName == loginDto.Username); 
+            var user = await context.Users
+                .Include(x => x.Photos)
+                .SingleOrDefaultAsync(n => n.UserName == loginDto.Username); 
             if (user == null) return Unauthorized("Invalid username or password");
 
             using var hmac = new HMACSHA512(user.PasswordSalt);
@@ -81,7 +83,8 @@ namespace DatingApplicationBackEnd.Controllers
             return Ok(new UserDto
             {
                 Username = user.UserName,
-                Token = tokenService.CreateToken(user)
+                Token = tokenService.CreateToken(user),
+                PhotoUrl = user.Photos.FirstOrDefault(x=> x.IsMain)?.Url
             });
         }
     }
