@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DatingApplicationBackEnd.Extensions
 {
-    //This class is used to add pagination information inside the response header from server to client, So client can use that header and perform their task
+    //This class is used to add pagination information inside the response header from server to client, So client can use that header and perform their task....
     public static class HttpExtensions
     {
         public static void AddPaginationHeader(this HttpResponse response, int currentPage, int itemsPerPage, int totalItems, int totalPages)
