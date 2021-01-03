@@ -2,6 +2,7 @@
 using DatingApplicationBackEnd.Core.Models;
 using DatingApplicationBackEnd.DTOs;
 using DatingApplicationBackEnd.Extensions;
+using DatingApplicationBackEnd.Helper;
 using DatingApplicationBackEnd.Interfaces;
 using DatingApplicationBackEnd.Persistance;
 using Microsoft.AspNetCore.Authorization;
@@ -37,9 +38,13 @@ namespace DatingApplicationBackEnd.Controllers
         */
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDto>>> GetAllUser()
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetAllUser([FromQuery]UserParams userParams)
         {
-            var query = await userRepository.GetMembersAsync();
+            var query = await userRepository.GetMembersAsync(userParams);
+
+            //This will go to response header
+            Response.AddPaginationHeader(query.CurrentPage, query.PageSize, query.TotalCount, query.TotalPages);
+
             return Ok(query);
         }
 

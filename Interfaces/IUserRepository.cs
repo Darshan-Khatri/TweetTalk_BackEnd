@@ -1,5 +1,6 @@
 ﻿using DatingApplicationBackEnd.Core.Models;
 using DatingApplicationBackEnd.DTOs;
+using DatingApplicationBackEnd.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +17,9 @@ namespace DatingApplicationBackEnd.Interfaces
         Task<AppUser> GetUserByUsernameAsync(string username);
 
 
-        Task<IEnumerable<MemberDto>> GetMembersAsync();
+        Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams);
+
+
         Task<MemberDto> GetMemberByUsernameAsync(string username);
-
-
     }
 }
