@@ -7,6 +7,7 @@ namespace DatingApplicationBackEnd.Helper
 {
     public class PaginationHeader
     {
+        //These properties will be added to respose header when client class GetAllUser API.
         public PaginationHeader(int currentPage, int itemPerPage, int totalItems, int totalPages)
         {
             CurrentPage = currentPage;

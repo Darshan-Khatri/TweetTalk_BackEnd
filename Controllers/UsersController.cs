@@ -40,6 +40,14 @@ namespace DatingApplicationBackEnd.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetAllUser([FromQuery]UserParams userParams)
         {
+            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            userParams.CurrentUsername = user.UserName;
+
+            if(string.IsNullOrEmpty(userParams.Gender))
+            {
+                userParams.Gender = user.Gender == "male" ? "female" : "male";
+            }
+
             var query = await userRepository.GetMembersAsync(userParams);
 
             //This will go to response header

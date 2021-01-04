@@ -22,7 +22,7 @@ namespace DatingApplicationBackEnd.Extensions
 
             response.Headers.Add("Pagination", JsonSerializer.Serialize(paginationHeader, options));
 
-            /*To allow our corse polici pass header in respose we have to specify "Access-Control-Expose-Header" exactly same way, if you do spelling mistake then it will cause error.
+            /*To allow our cors policy to pass header in respose, we have to specify "Access-Control-Expose-Header" exactly same way, if you do spelling mistake then it will cause error.
              */
             response.Headers.Add("Access-Control-Expose-Headers", "Pagination");
         }

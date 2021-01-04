@@ -57,9 +57,9 @@ namespace DatingApplicationBackEnd.Controllers
                 {
                     Username = registerDto.Username,
                     Token = tokenService.CreateToken(user),
-                    KnownAs = user.KnownAs
-                }
-                );
+                    KnownAs = user.KnownAs,
+                    Gender = user.Gender
+                });
         }
 
         private async Task<bool> UserExists(string username)
@@ -91,7 +91,8 @@ namespace DatingApplicationBackEnd.Controllers
                 Username = user.UserName,
                 Token = tokenService.CreateToken(user),
                 PhotoUrl = user.Photos.FirstOrDefault(x=> x.IsMain)?.Url,
-                KnownAs = user.KnownAs
+                KnownAs = user.KnownAs,
+                Gender = user.Gender
             });
         }
     }

@@ -29,17 +29,38 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
                     .Where(s => s.UserName == username)
                     .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
                     .SingleOrDefaultAsync();
-            throw new NotImplementedException();
         }
 
         //*********Pagination*************************************
         public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
         {
-            var query = context.Users
-                    .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
-                    .AsNoTracking();
+            var query = context.Users.AsQueryable();
 
-            return await PagedList<MemberDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+            //Filter queries
+            query = query.Where(u => u.UserName != userParams.CurrentUsername);
+            query = query.Where(u => u.Gender == userParams.Gender);
+
+            var minDob = DateTime.Today.AddYears(-userParams.MaxAge - 1); // Oldest
+            var maxDob = DateTime.Today.AddYears(-userParams.MinAge); // Youngest
+
+            query = query.Where(u => u.DateOfBirth >= minDob && u.DateOfBirth <= maxDob);
+
+
+            //Sorting queries
+            query = userParams.OrderBy switch
+            {
+                "created" => query.OrderByDescending(u => u.Created),
+
+                //We write Default statement of switch statement with "_"(dash).
+                _ => query.OrderByDescending(u => u.LastActive)
+            };
+
+            return await PagedList<MemberDto>.CreateAsync
+                (
+                    query.ProjectTo<MemberDto>(mapper.ConfigurationProvider).AsNoTracking(),
+                    userParams.PageNumber, userParams.PageSize
+                );
+
         }
         //************************************************************
 
