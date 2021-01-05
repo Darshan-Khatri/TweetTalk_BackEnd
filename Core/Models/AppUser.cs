@@ -29,5 +29,11 @@ namespace DatingApplicationBackEnd.Core.Models
         {
             return DateOfBirth.CalculateAge(); 
         }*/
+
+        //Who has liked currently loggedIn user.
+        public ICollection<UserLike> LikedByUsers { get; set; }
+
+        //list of user which is liked by loggedIn user.
+        public ICollection<UserLike> LikedUsers { get; set; }
     }
 }
