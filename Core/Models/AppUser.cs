@@ -35,5 +35,10 @@ namespace DatingApplicationBackEnd.Core.Models
 
         //list of user which is liked by loggedIn user.
         public ICollection<UserLike> LikedUsers { get; set; }
+
+
+        //For messages
+        public ICollection<Message> MessagesSent { get; set; }
+        public ICollection<Message> MessagesReceived { get; set; }
     }
 }
