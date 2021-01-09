@@ -37,17 +37,26 @@ namespace DatingApplicationBackEnd.Controllers
         * Meet you in startup.cs file.
         */
 
+        //{{url}}/users?pageNumber=1&pageSize=10&gender=Male&minAge=18&maxAge=150
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetAllUser([FromQuery]UserParams userParams)
         {
             var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
             userParams.CurrentUsername = user.UserName;
 
-            if(string.IsNullOrEmpty(userParams.Gender))
+            /*  If you don't specify anything in request header for Gender type i.e if userParams.Gender is empty or        null then we will select Gender opposite of current loggedIn user gender.
+                For ex:- LoggedIn user is Male then will set Gender as Female.
+                - When request comes here it has following paramters in request header
+                {{url}}/users?pageNumber=1&pageSize=10&currentUsername=lisa&minAge=18&maxAge=150&OrderBy=lastActive
+             */
+
+            if (string.IsNullOrEmpty(userParams.Gender))
             {
                 userParams.Gender = user.Gender == "male" ? "female" : "male";
             }
 
+            //Request header now => 
+            //{{url}}/users?pageNumber=1&pageSize=10&currentUsername=lisa&gender=Male&minAge=18&maxAge=150&OrderBy=lastActive
             var query = await userRepository.GetMembersAsync(userParams);
 
             //This will go to response header

@@ -13,14 +13,17 @@ namespace DatingApplicationBackEnd.HelperDTO
     {
         public AutoMapperProfiles()
         {
+            //Here are are telling IMapper what to do when you're converting models from AppUser to MemberDto
             CreateMap<AppUser, MemberDto>()
                 .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => 
                     src.Photos.FirstOrDefault(x => x.IsMain).Url))
                 .ForMember(dest => dest.Age, opt => opt.MapFrom(src => src.DateOfBirth.CalculateAge()));
+
             CreateMap<Photo, PhotoDto>();
 
             CreateMap<MemberUpdateDto, AppUser>();
 
+            //Converting from RegisterDto to AppUser
             CreateMap<RegisterDto, AppUser>();
 
             CreateMap<Message, MessageDto>()

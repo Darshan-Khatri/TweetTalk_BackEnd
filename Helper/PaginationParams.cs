@@ -8,8 +8,10 @@ namespace DatingApplicationBackEnd.Helper
     //This class helps us in Pagination
     public class PaginationParams
     {
+        //Maximum you can show 50 record per page
         private const int MaxPageSize = 50;
 
+        //ByDefault we will show 1st page to user.
         public int PageNumber { get; set; } = 1;
 
         //Records per page

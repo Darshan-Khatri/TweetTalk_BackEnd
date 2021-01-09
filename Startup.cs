@@ -44,7 +44,7 @@ namespace DatingApplicationBackEnd
 
             app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
 
-            //When server sees any "authorize" property in ActionMethod that request stops here it will internally look for any authentication scheme in IServiceCollection. Here we have that scheme in our IdentityService extension method.
+            //When server sees any "authorize" property in ActionMethod then request stops here it will internally look for any authentication scheme in IServiceCollection. Here we have that scheme in our IdentityService extension method.
             app.UseAuthentication();
 
             app.UseAuthorization();

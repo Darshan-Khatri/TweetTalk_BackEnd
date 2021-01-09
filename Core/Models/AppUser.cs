@@ -1,4 +1,4 @@
-﻿using DatingApplicationBackEnd.Extensions;
+﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace DatingApplicationBackEnd.Core.Models
 {
-    public class AppUser
+    public class AppUser : IdentityUser<int>
     {
-        public int Id { get; set; }
-        public string UserName { get; set; }
-        public byte[] PasswordHash { get; set; }
-        public byte[] PasswordSalt { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string KnownAs { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
@@ -40,5 +36,8 @@ namespace DatingApplicationBackEnd.Core.Models
         //For messages
         public ICollection<Message> MessagesSent { get; set; }
         public ICollection<Message> MessagesReceived { get; set; }
+
+        //This sepcifies that AppUserRole table will have AppUserID as foreign key in its table
+        public ICollection<AppUserRole> UserRoles { get; set; }
     }
 }

@@ -1,5 +1,7 @@
+using DatingApplicationBackEnd.Core.Models;
 using DatingApplicationBackEnd.Persistance;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,9 +25,11 @@ namespace DatingApplicationBackEnd
             try
             {
                 var context = services.GetRequiredService<DataContext>();
+                var userManager = services.GetRequiredService<UserManager<AppUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
                 //When we run our application it will automatically addMigration and update-database if there is somechanges in to it. So now we don't need to manually write add-migration and update-database in package manager console.
                 await context.Database.MigrateAsync();
-                await Seed.SeedUsers(context);
+                await Seed.SeedUsers(userManager, roleManager);
             }
             catch (Exception ex)
             {

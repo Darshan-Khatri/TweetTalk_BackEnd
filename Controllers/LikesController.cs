@@ -25,10 +25,13 @@ namespace DatingApplicationBackEnd.Controllers
         }
 
         [HttpPost("{username}")]
+        //This is the username of user whome loggedIn user liked.
         public async Task<ActionResult> AddLike(string username)
         {
             var sourceUserId = User.GetUserId();
             var likedUser = await userRepository.GetUserByUsernameAsync(username);
+            
+            //Here we get infomation about loggedIn user and Collection of users those are liked by loggedIn user.
             var sourceUser = await likesRepository.GetUserWithLikes(sourceUserId);
 
             if (likedUser == null) NotFound();
@@ -44,6 +47,7 @@ namespace DatingApplicationBackEnd.Controllers
                 LikedUserId = likedUser.Id
             };
 
+            //Here we are adding userLike object to LikedUsers Collection
             sourceUser.LikedUsers.Add(userLike);
 
             if (await userRepository.SavaAllAsync()) return Ok();

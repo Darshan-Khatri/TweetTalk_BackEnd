@@ -1,4 +1,5 @@
 ﻿using DatingApplicationBackEnd.Core.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,26 +14,46 @@ namespace DatingApplicationBackEnd.Persistance
     //We will seedData program.cs file bcoz our applicaion starts from program.cs and when it starts at that time we will seed data. Therefore program.cs is the best place to seed data to database.
     public class Seed
     {
-        public static async Task SeedUsers(DataContext context)
+        //We have included role manager bcoz we are adding three types of role in AppRole Table
+        public static async Task SeedUsers(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
         {
-            //It will check in User table that whether we have any users or not. If table has user then it will return true else false.
-            if (await context.Users.AnyAsync()) return;
+            //It will check in Users table that whether we have any users or not. If table has user then it will return true else false.
+            if (await userManager.Users.AnyAsync()) return;
 
             var userData = await System.IO.File.ReadAllTextAsync("Persistance/UserSeedData.json");
 
             var users = JsonSerializer.Deserialize<List<AppUser>>(userData);
 
-            foreach (var user in users)
-            {
-                using var hmac = new HMACSHA512();
-                user.UserName = user.UserName.ToLower();
-                user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes("Pa$$w0rd"));
-                user.PasswordSalt = hmac.Key;
+            if (users == null) return;
 
-                context.Users.Add(user);
+            var roles = new List<AppRole>
+            {
+                new AppRole { Name = "Member"},
+                new AppRole { Name = "Admin"},
+                new AppRole { Name = "Moderator"},
+            };
+
+            foreach (var item in roles)
+            {
+                await roleManager.CreateAsync(item);
             }
 
-            await context.SaveChangesAsync();
+            foreach (var user in users)
+            {
+                user.UserName = user.UserName.ToLower();
+                await userManager.CreateAsync(user, "Pa$$w0rd");
+                await userManager.AddToRoleAsync(user, "Member");
+            }
+
+            //Here we are creating new user which has 2 roles Admin and moderator
+            var admin = new AppUser
+            {
+                UserName = "admin"
+            };
+
+            await userManager.CreateAsync(admin,"Pa$$w0rd");
+
+            await userManager.AddToRolesAsync(admin, new[] { "Admin", "Moderator" });
         }
     }
 }

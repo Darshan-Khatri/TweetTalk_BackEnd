@@ -19,10 +19,10 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
         {
             this.context = context;
         }
+
         public async Task<UserLike> GetUserLike(int sourceUserId, int likedUserId)
         {
-            return await context.Likes.FindAsync(sourceUserId, likedUserId);
-            
+            return await context.Likes.FindAsync(sourceUserId, likedUserId);         
         }
 
         public async Task<PagedList<LikeDto>> GetUserLikes(LikesParams likesParams)
@@ -33,6 +33,7 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
             if (likesParams.Predicate == "liked")
             {
                 likes = likes.Where(like => like.SourceUserId == likesParams.UserId);
+                /*By writing like this it internally writes the query in such a way that it join two table and gives the App-user list who is liked by me*/
                 users = likes.Select(like => like.LikedUser);
             }
 
@@ -40,6 +41,7 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
             if (likesParams.Predicate == "likedBy")
             {
                 likes = likes.Where(like => like.LikedUserId == likesParams.UserId);
+                /*By writing like this it internally writes the query in such a way that it join two table and gives the App-user list who liked me*/
                 users = likes.Select(like => like.SourceUser);
             }
 

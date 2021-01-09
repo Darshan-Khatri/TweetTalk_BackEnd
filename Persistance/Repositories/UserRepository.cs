@@ -32,6 +32,9 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
         }
 
         //*********Pagination*************************************
+        /*When request reach here 
+         * userParams = pageNumber=1,pageSize=10,currentUsername=lisa,gender=Male,minAge=18,maxAge=150,OrderBy=lastActive
+         */
         public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
         {
             var query = context.Users.AsQueryable();
@@ -44,7 +47,6 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
             var maxDob = DateTime.Today.AddYears(-userParams.MinAge); // Youngest
 
             query = query.Where(u => u.DateOfBirth >= minDob && u.DateOfBirth <= maxDob);
-
 
             //Sorting queries
             query = userParams.OrderBy switch
