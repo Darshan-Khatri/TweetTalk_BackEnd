@@ -1,5 +1,6 @@
 using DatingApplicationBackEnd.Extensions;
 using DatingApplicationBackEnd.Middleware;
+using DatingApplicationBackEnd.SignalR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +32,10 @@ namespace DatingApplicationBackEnd
             //This are our custome Extension Methods
             services.AddApplicationServices(Configuration);
             services.AddIdentityService(Configuration);
+
+            //Adding signalR service, Now we also need to tell are routing about Api/Hub end points.
+            //So go to Configure method below and and end point routing for Hub.
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,7 +47,10 @@ namespace DatingApplicationBackEnd
 
             app.UseRouting();
 
-            app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
+            app.UseCors(x => x.AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    .WithOrigins("http://localhost:4200"));
 
             //When server sees any "authorize" property in ActionMethod then request stops here it will internally look for any authentication scheme in IServiceCollection. Here we have that scheme in our IdentityService extension method.
             app.UseAuthentication();
@@ -52,6 +60,11 @@ namespace DatingApplicationBackEnd
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                //This takes care of setting up our hubs => Now we also need to take care authorization bcoz our hub will get authenticated.
+                //So will learn now how to authenticate user in SignaR => Go to PresenceHub.cs and apply authorize Tag their and then set up Authentication in "IdentityServiceExtension".
+                endpoints.MapHub<PresenceHub>("hubs/presence");
+                endpoints.MapHub<MessageHub>("hubs/message");
             });
         }
     }

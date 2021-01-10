@@ -5,6 +5,7 @@ using DatingApplicationBackEnd.Interfaces;
 using DatingApplicationBackEnd.Persistance;
 using DatingApplicationBackEnd.Persistance.Repositories;
 using DatingApplicationBackEnd.Services;
+using DatingApplicationBackEnd.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,7 @@ namespace DatingApplicationBackEnd.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration Configuration)
         {
+            services.AddSingleton<PresenceTracker>();
             services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IPhotoService, PhotoService>();

@@ -39,6 +39,7 @@ namespace DatingApplicationBackEnd.Extensions
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(Options =>
                 {
+                    //JWT token is added to is added to authorization header by default
                     Options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
@@ -46,6 +47,26 @@ namespace DatingApplicationBackEnd.Extensions
                         ValidateIssuer = false,
                         ValidateAudience = false,
                     };
+
+                    //SignalR passes authorization in query params not in Header. 
+                    //This allows our client to send token as query string
+                    Options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            //When client request some messaging feature then it passes signalR access_token in http request query params to our server, so that access_token is received here.
+                            var accessToken = context.Request.Query["access_token"];
+
+                            var path = context.HttpContext.Request.Path;    //Below string must match with what you have specified in startup.cs file.
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+
                 });
 
             //we are using authorize service for user authorization role based on user role.
