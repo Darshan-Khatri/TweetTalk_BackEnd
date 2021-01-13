@@ -21,7 +21,7 @@ namespace DatingApplicationBackEnd.Core.Models
         public string Content { get; set; }
         //If message is not read then it will becomes null
         public DateTime? DateRead { get; set; }
-        public DateTime MessageSent { get; set; } = DateTime.Now;
+        public DateTime MessageSent { get; set; } = DateTime.UtcNow;
         public bool SenderDeleted { get; set; }
         public bool RecipientDeleted { get; set; }
     }

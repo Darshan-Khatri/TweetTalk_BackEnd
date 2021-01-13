@@ -48,7 +48,7 @@ namespace DatingApplicationBackEnd.Services
             };
 
             //we are doing this to add roles in JWT Token claims.
-            //So now inside our roles variable we List of roles loggedIn user belongs to.
+            //So now inside our roles variable we pass List of roles loggedIn user belongs to.
             /*For eg: lisa loggedIn in so role of lisa is "Member" so roles variable would contain "Member". if some other user LoggedIn and it has two roles then roles varible would contain "Admin" and "Moderator".
              */
             var roles = await userManager.GetRolesAsync(user);

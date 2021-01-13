@@ -24,14 +24,14 @@ namespace DatingApplicationBackEnd.Helper
 
             var userId = resultContext.HttpContext.User.GetUserId();
 
-            //This is how you get acces of IUserRepository Service anywhere.
+            //This is how you get acces of IUnitOfWork Service anywhere.
             //NOTE:- For this you have to import "Microsoft.Extensions.DependencyInjection"
-            var repo = resultContext.HttpContext.RequestServices.GetService<IUserRepository>();
+            var uow = resultContext.HttpContext.RequestServices.GetService<IUnitOfWork>();
 
-            var user = await repo.GetUserByIdAsync(userId);
-            user.LastActive = DateTime.Now;
+            var user = await uow.UserRepository.GetUserByIdAsync(userId);
+            user.LastActive = DateTime.UtcNow;
 
-            await repo.SavaAllAsync();
+            await uow.Complete();
         }
     }
 }

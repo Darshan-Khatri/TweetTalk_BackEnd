@@ -78,6 +78,13 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
                 .SingleOrDefaultAsync(x => x.UserName == username);
         }
 
+        public async Task<string> GetUserGender(string username)
+        {
+            return await context.Users.Where(x => x.UserName == username)
+                                        .Select(x => x.Gender)
+                                        .FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<AppUser>> GetUsersAsync()
         {
             return await context.Users
@@ -85,11 +92,7 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
                 .ToListAsync();
         }
 
-        public async Task<bool> SavaAllAsync()
-        {
-            return await context.SaveChangesAsync() > 0;
-        }
-
+        
         public void Update(AppUser user)
         {
             //What this does is it will apply flag to entity which hasbeen modified.

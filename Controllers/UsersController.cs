@@ -20,14 +20,14 @@ namespace DatingApplicationBackEnd.Controllers
     [Authorize]
     public class UsersController : BaseApiController
     {
-        private readonly IUserRepository userRepository;
+        private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
         private readonly IPhotoService photoService;
 
         //To use all database tables you must instantiate your DataContext class in controllers constructor.  
-        public UsersController(IUserRepository userRepository, IMapper mapper, IPhotoService photoService)
+        public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IPhotoService photoService)
         {
-            this.userRepository = userRepository;
+            this.unitOfWork = unitOfWork;
             this.mapper = mapper;
             this.photoService = photoService;
         }
@@ -41,8 +41,8 @@ namespace DatingApplicationBackEnd.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetAllUser([FromQuery]UserParams userParams)
         {
-            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
-            userParams.CurrentUsername = user.UserName;
+            var gender = await unitOfWork.UserRepository.GetUserGender(User.GetUsername());
+            userParams.CurrentUsername = User.GetUsername();
 
             /*  If you don't specify anything in request header for Gender type i.e if userParams.Gender is empty or        null then we will select Gender opposite of current loggedIn user gender.
                 For ex:- LoggedIn user is Male then will set Gender as Female.
@@ -52,12 +52,12 @@ namespace DatingApplicationBackEnd.Controllers
 
             if (string.IsNullOrEmpty(userParams.Gender))
             {
-                userParams.Gender = user.Gender == "male" ? "female" : "male";
+                userParams.Gender = gender == "male" ? "female" : "male";
             }
 
             //Request header now => 
             //{{url}}/users?pageNumber=1&pageSize=10&currentUsername=lisa&gender=Male&minAge=18&maxAge=150&OrderBy=lastActive
-            var query = await userRepository.GetMembersAsync(userParams);
+            var query = await unitOfWork.UserRepository.GetMembersAsync(userParams);
 
             //This will go to response header
             Response.AddPaginationHeader(query.CurrentPage, query.PageSize, query.TotalCount, query.TotalPages);
@@ -72,7 +72,7 @@ namespace DatingApplicationBackEnd.Controllers
         /*[HttpGet("GetUser/{Id}")]
         public async Task<ActionResult<AppUser>> GetUser(int Id)
         {
-            var query = await userRepository.GetUserByIdAsync(Id);
+            var query = await unitOfWork.UserRepository.GetUserByIdAsync(Id);
             return Ok(query);
         }*/
 
@@ -81,7 +81,7 @@ namespace DatingApplicationBackEnd.Controllers
         [HttpGet("{username}", Name = "GetUser")]
         public async Task<ActionResult<MemberDto>> GetUser(string username)
         {
-            return await userRepository.GetMemberByUsernameAsync(username);
+            return await unitOfWork.UserRepository.GetMemberByUsernameAsync(username);
         }
 
         [HttpPut]
@@ -90,13 +90,13 @@ namespace DatingApplicationBackEnd.Controllers
             //User.GetUsername() => This will gives us username from the token that api uses to authenticate user.
             /* As you know our Claims(username, email, id etc) are encrypted in our JWT tokens. To get/extract claims from encrypted token we are using ClaimsPrinciple property "User" for it and we get our username back from it.
              */
-            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             //Need to map from memberUpdateDto to AppUser
             mapper.Map(memberUpdateDto, user);
 
-            userRepository.Update(user);
-            if (await userRepository.SavaAllAsync()) return NoContent();
+            unitOfWork.UserRepository.Update(user);
+            if (await unitOfWork.Complete()) return NoContent();
             return BadRequest("Fails to update user!!");
         }
 
@@ -107,7 +107,7 @@ namespace DatingApplicationBackEnd.Controllers
         [HttpPost("add-photo")]
         public async Task<ActionResult<PhotoDto>> AddPhoto(IFormFile file)
         {
-            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             var result = await photoService.AddPhotoAsync(file);
 
@@ -135,7 +135,7 @@ namespace DatingApplicationBackEnd.Controllers
              */
             user.Photos.Add(photo);
 
-            if (await userRepository.SavaAllAsync())
+            if (await unitOfWork.Complete())
             {
                 return CreatedAtRoute("GetUser", new { username = user.UserName }, mapper.Map<PhotoDto>(photo));
             }
@@ -146,7 +146,7 @@ namespace DatingApplicationBackEnd.Controllers
         public async Task<ActionResult> SetMainPhoto(int photoId)
         {
             //We need to use query with eager load otherwise it will lead to error. 
-            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 
@@ -157,7 +157,7 @@ namespace DatingApplicationBackEnd.Controllers
             if (currentMain != null) currentMain.IsMain = false;
             photo.IsMain = true;
 
-            if (await userRepository.SavaAllAsync()) return NoContent();
+            if (await unitOfWork.Complete()) return NoContent();
 
             return BadRequest("Failed to set main photo");
         }
@@ -165,7 +165,7 @@ namespace DatingApplicationBackEnd.Controllers
         [HttpDelete("delete-photo/{photoId}")]
         public async Task<ActionResult> DeletePhoto(int photoId)
         {
-            var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             var photo = user.Photos.FirstOrDefault(x => x.Id == photoId);
 
@@ -180,7 +180,7 @@ namespace DatingApplicationBackEnd.Controllers
 
             user.Photos.Remove(photo);
 
-            if (await userRepository.SavaAllAsync()) return Ok();
+            if (await unitOfWork.Complete()) return Ok();
 
             return BadRequest("Failed to delete photo !!");
         }

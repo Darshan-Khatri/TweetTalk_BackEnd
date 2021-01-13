@@ -16,14 +16,12 @@ namespace DatingApplicationBackEnd.Controllers
     [Authorize]
     public class MessagesController : BaseApiController
     {
-        private readonly IMessageRepository messageRepository;
-        private readonly IUserRepository userRepository;
+        private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
 
-        public MessagesController(IMessageRepository messageRepository, IUserRepository userRepository,IMapper mapper)
+        public MessagesController(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            this.messageRepository = messageRepository;
-            this.userRepository = userRepository;
+            this.unitOfWork = unitOfWork;
             this.mapper = mapper;
         }
 
@@ -37,10 +35,10 @@ namespace DatingApplicationBackEnd.Controllers
                 return BadRequest("You can't send message to yourself.");
 
             //gets loggedIn user info
-            var sender = await userRepository.GetUserByUsernameAsync(username);
-
+            var sender = await unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+            
             //gets recipient's info
-            var recipient = await userRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername);
+            var recipient = await unitOfWork.UserRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername);
 
             if (recipient == null) return NotFound();
 
@@ -53,9 +51,9 @@ namespace DatingApplicationBackEnd.Controllers
                 Content = createMessageDto.Content
             };
 
-            messageRepository.AddMessage(message);
-
-            if (await messageRepository.SaveAllAsync()) return Ok(mapper.Map<MessageDto>(message));
+            unitOfWork.MessageRepository.AddMessage(message);
+            
+            if (await unitOfWork.Complete()) return Ok(mapper.Map<MessageDto>(message));
 
             return BadRequest("Fails to send message");
         }
@@ -63,28 +61,21 @@ namespace DatingApplicationBackEnd.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessageForUser([FromQuery] MessageParams messageParams)
         {
+            //NOTE:- Here the username is of other user(receiver), since we have hold of loggedIn username into claims
             messageParams.Username = User.GetUsername();
 
-            var messages = await messageRepository.GetMessagesForUser(messageParams);
+            var messages = await unitOfWork.MessageRepository.GetMessagesForUser(messageParams);
 
             Response.AddPaginationHeader(messages.CurrentPage, messages.PageSize, messages.TotalCount, messages.TotalPages);
 
             return messages;
         }
 
-        //NOTE:- Here the username is of other user(receiver), since we have hold of loggedIn username into claims
-        [HttpGet("thread/{username}")]
-        public async Task<ActionResult<IEnumerable<MessageDto>>> GetMessageThread(string username)
-        {
-            var currentUsername = User.GetUsername();
-            return Ok(await messageRepository.GetMessageThread(currentUsername, username));
-        }
-
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMessage(int id)
         {
             var username = User.GetUsername();
-            var message = await messageRepository.GetMessage(id);
+            var message = await unitOfWork.MessageRepository.GetMessage(id);
 
             if (message.Sender.UserName != username && message.Recipient.UserName != username)
                 return Unauthorized();
@@ -94,12 +85,12 @@ namespace DatingApplicationBackEnd.Controllers
             if (message.Recipient.UserName == username) message.RecipientDeleted = true;
 
             if (message.SenderDeleted && message.RecipientDeleted)
-                messageRepository.DeleteMessage(message);
+                unitOfWork.MessageRepository.DeleteMessage(message);
 
-            if (await messageRepository.SaveAllAsync()) return Ok();
+            if (await unitOfWork.Complete()) return Ok();
 
             return BadRequest("Problem in deleting the message");
-            
+
         }
     }
 }

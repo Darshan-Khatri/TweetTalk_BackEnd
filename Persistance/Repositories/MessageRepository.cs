@@ -22,6 +22,12 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
             this.context = context;
             this.mapper = mapper;
         }
+
+        public void AddGroup(Group group)
+        {
+            context.Groups.Add(group);
+        }
+
         public void AddMessage(Message message)
         {
             context.Messages.Add(message);
@@ -33,6 +39,20 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
             context.Messages.Remove(message);
         }
 
+        public async Task<Connection> GetConnection(string connectionId)
+        {
+            return await context.Connections.FindAsync(connectionId);
+        }
+
+        public async Task<Group> GetGroupForConnection(string connectionId)
+        {
+            return await context.Groups
+                            .Include(x => x.Connections)
+                            .Where(c => c.Connections.Any(x => x.ConnectionId == connectionId))
+                            .FirstOrDefaultAsync();
+
+        }
+
         public async Task<Message> GetMessage(int id)
         {
             return await context.Messages
@@ -41,24 +61,30 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
                 .SingleOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<Group> GetMessageGroup(string groupName)
+        {
+            return await context.Groups
+                .Include(x => x.Connections)
+                .FirstOrDefaultAsync(x => x.Name == groupName);
+        }
+
         public async Task<PagedList<MessageDto>> GetMessagesForUser(MessageParams messageParams)
         {
             var query = context.Messages
                 .OrderByDescending(m => m.MessageSent)
+                .ProjectTo<MessageDto>(mapper.ConfigurationProvider)
                 .AsQueryable();
 
             //Inbox => Who sent me messages
             //OutBox => Whom i sent the messages
             query = messageParams.Container switch
             {
-                "Inbox" => query.Where(u => u.Recipient.UserName == messageParams.Username && u.RecipientDeleted == false),
-                "Outbox" => query.Where(u => u.Sender.UserName == messageParams.Username && u.SenderDeleted == false),
-                _ => query.Where(u => u.Recipient.UserName == messageParams.Username && u.RecipientDeleted==false &&u.DateRead == null)
+                "Inbox" => query.Where(u => u.RecipientUsername == messageParams.Username && u.RecipientDeleted == false),
+                "Outbox" => query.Where(u => u.SenderUsername == messageParams.Username && u.SenderDeleted == false),
+                _ => query.Where(u => u.RecipientUsername == messageParams.Username && u.RecipientDeleted==false &&u.DateRead == null)
             };
-
-            var messages = query.ProjectTo<MessageDto>(mapper.ConfigurationProvider);
-
-            return await PagedList<MessageDto>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
+           
+            return await PagedList<MessageDto>.CreateAsync(query, messageParams.PageNumber, messageParams.PageSize);
         }
 
         public async Task<IEnumerable<MessageDto>> GetMessageThread(string currentUsername, string recipientUsername)
@@ -70,35 +96,33 @@ namespace DatingApplicationBackEnd.Persistance.Repositories
              * 3)Get messageList when todd is sender and lisa is receiver &&
              * 4)Get messageList when todd is receiver and lisa is sender
              */
-            var message = await context.Messages
-                .Include(u => u.Sender).ThenInclude(p => p.Photos)
-                .Include(u => u.Recipient).ThenInclude(p => p.Photos)
+            var messages = await context.Messages
                 .Where(m => m.Recipient.UserName == currentUsername && m.RecipientDeleted == false
                         && m.Sender.UserName == recipientUsername
                         || m.Recipient.UserName == recipientUsername
                         && m.Sender.UserName == currentUsername && m.SenderDeleted == false
                 )
                 .OrderBy(m => m.MessageSent)
+                .ProjectTo<MessageDto>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
             //if lisa have not read the messages from todd then it will be marked as unread so the below query checks that whether the dataread is null and when lisa is receiver, if so then it will set unreadMessage read by updating dataRead property to currentData
-            var unreadMessages = message.Where(m => m.DateRead == null && m.Recipient.UserName == currentUsername).ToList();
+            var unreadMessages = messages.Where(m => m.DateRead == null && m.RecipientUsername == currentUsername).ToList();
 
             if (unreadMessages.Any())
             {
                 foreach (var msg in unreadMessages)
                 {
-                    msg.DateRead = DateTime.Now;
-                }
-                await context.SaveChangesAsync();
+                    msg.DateRead = DateTime.UtcNow;
+                }                
             }
-
-            return mapper.Map<IEnumerable<MessageDto>>(message);
+            return messages;
         }
 
-        public async Task<bool> SaveAllAsync()
+        public void RemoveConnection(Connection connection)
         {
-            return await context.SaveChangesAsync() > 0;
+            context.Connections.Remove(connection);
         }
+
     }
 }

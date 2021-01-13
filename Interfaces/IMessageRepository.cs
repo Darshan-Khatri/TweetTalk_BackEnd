@@ -10,6 +10,14 @@ namespace DatingApplicationBackEnd.Interfaces
 {
     public interface IMessageRepository
     {
+        //This method allows us to manage connection with signalR
+        void AddGroup(Group group);
+        void RemoveConnection(Connection connection);
+        Task<Connection> GetConnection(string connectionId);
+        Task<Group> GetMessageGroup(string groupName);
+        Task<Group> GetGroupForConnection(string connectionId);
+        //*************************************************
+
         void AddMessage(Message message);
 
         void DeleteMessage(Message message);
@@ -21,6 +29,5 @@ namespace DatingApplicationBackEnd.Interfaces
         //Get conversation thread between two user
         Task<IEnumerable<MessageDto>> GetMessageThread(string currentUsername, string recipientUsername);
 
-        Task<bool> SaveAllAsync();
     }
 }

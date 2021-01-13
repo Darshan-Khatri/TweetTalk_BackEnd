@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace DatingApplicationBackEnd.DTOs
@@ -19,5 +20,11 @@ namespace DatingApplicationBackEnd.DTOs
         public string Content { get; set; }
         public DateTime? DateRead { get; set; }
         public DateTime MessageSent { get; set; }
+
+        /*If we write JsonIgnore to write property then that property will not be send to client but we can use it here(Server side)*/
+        [JsonIgnore]
+        public bool SenderDeleted { get; set; }
+        [JsonIgnore]
+        public bool RecipientDeleted { get; set; }
     }
 }

@@ -15,13 +15,11 @@ namespace DatingApplicationBackEnd.Controllers
     [Authorize]
     public class LikesController : BaseApiController
     {
-        private readonly IUserRepository userRepository;
-        private readonly ILikesRepository likesRepository;
+        private readonly IUnitOfWork unitOfWork;
 
-        public LikesController(IUserRepository userRepository, ILikesRepository likesRepository)
+        public LikesController(IUnitOfWork unitOfWork)
         {
-            this.userRepository = userRepository;
-            this.likesRepository = likesRepository;
+            this.unitOfWork = unitOfWork;
         }
 
         [HttpPost("{username}")]
@@ -29,15 +27,16 @@ namespace DatingApplicationBackEnd.Controllers
         public async Task<ActionResult> AddLike(string username)
         {
             var sourceUserId = User.GetUserId();
-            var likedUser = await userRepository.GetUserByUsernameAsync(username);
+            
+            var likedUser = await unitOfWork.UserRepository.GetUserByUsernameAsync(username);
             
             //Here we get infomation about loggedIn user and Collection of users those are liked by loggedIn user.
-            var sourceUser = await likesRepository.GetUserWithLikes(sourceUserId);
+            var sourceUser = await unitOfWork.LikesRepository.GetUserWithLikes(sourceUserId);
 
             if (likedUser == null) NotFound();
             if (sourceUser.UserName == username) return BadRequest("You cannot like yourself");
 
-            var userLike = await likesRepository.GetUserLike(sourceUserId, likedUser.Id);
+            var userLike = await unitOfWork.LikesRepository.GetUserLike(sourceUserId, likedUser.Id);
 
             if (userLike != null) return BadRequest("You already like this user");
 
@@ -50,7 +49,7 @@ namespace DatingApplicationBackEnd.Controllers
             //Here we are adding userLike object to LikedUsers Collection
             sourceUser.LikedUsers.Add(userLike);
 
-            if (await userRepository.SavaAllAsync()) return Ok();
+            if (await unitOfWork.Complete()) return Ok();
 
             return BadRequest("falied to like user");
         }
@@ -59,7 +58,7 @@ namespace DatingApplicationBackEnd.Controllers
         public async Task<ActionResult<IEnumerable<LikeDto>>> GetUserLikes([FromQuery]LikesParams likesParams)
         {
             likesParams.UserId = User.GetUserId();
-            var users = await likesRepository.GetUserLikes(likesParams);
+            var users = await unitOfWork.LikesRepository.GetUserLikes(likesParams);
 
             Response.AddPaginationHeader(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages);
 
